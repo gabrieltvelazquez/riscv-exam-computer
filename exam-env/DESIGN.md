@@ -3,11 +3,17 @@
 The console is used in a classroom, often on a laptop at the front of the
 room, sometimes on a phone while walking between rows. It has one job: show
 which exam boards are ready and let the instructor start or stop them with
-confidence. The design is called **Night**. It is flat and dark only:
-square-cornered charcoal panels with 1px rules on a near-black page, a
-dense layout, white for primary actions, and color spent only on status.
-Think instrument panel, not a marketing site: no rounded corners, no
-blur, no glow, no hover lift.
+confidence.
+
+The visual system follows **Vercel's Geist language**. The upstream
+reference is vendored at [`design/vercel-reference.md`](design/vercel-reference.md)
+(from [awesome-design-md](https://github.com/VoltAgent/awesome-design-md)).
+This file is the adaptation for the console and wins wherever the two
+disagree. In short: a stark ink-on-near-white duet (and its Geist dark
+twin), white cards held by a 1px hairline ring and stacked soft shadows,
+Geist for everything narrative, Geist Mono for anything technical, 6px
+in-app radii, and color spent only on status. The brand mesh gradient
+appears once, behind the sign-in card, the console's only hero surface.
 
 Principles, in priority order:
 
@@ -15,123 +21,132 @@ Principles, in priority order:
    and a word. Remove any one of them and the status is still readable.
 2. **Destructive and fleet-wide actions are explicit.** The UI always says
    how many boards an action targets and which boards it skipped and why.
-3. **Quiet by default, loud when it matters.** Structure comes from 1px
-   rules and spacing. Color is spent on status and on the security
-   warning only.
+3. **Quiet by default, loud when it matters.** Hairlines and spacing do the
+   structure; color is spent on status and on the security warning only.
 4. **Works offline.** No CDN fonts, scripts, or images. Everything is served
-   by the exam server.
+   by the exam server (Geist and Geist Mono are vendored, OFL).
 
 ## Tokens
 
 All tokens are CSS custom properties on `:root` in `server/style/main.css`.
-Components use tokens, never raw values. There is one theme (dark); the
-old light/dark toggle is no longer shown.
+Components use tokens, never raw values.
+
+### Themes
+
+Light is the default. Dark (Geist dark) applies when the system prefers it,
+or when the instructor picks it in the sidebar's Auto / Light / Dark toggle
+(stored in the `theme` cookie, applied as `html[data-theme]`).
 
 ### Color
 
-| Token              | Value                 | Use                                   |
-| ------------------ | --------------------- | ------------------------------------- |
-| `--paper`          | `#121214`             | Page background                       |
-| `--paper-glow`     | `#17171C`             | Soft radial light at the top of page  |
-| `--surface`        | `#18181B`             | Cards, panels, tiles                  |
-| `--surface-hover`  | `#202024`             | Hovered cards, secondary btns         |
-| `--surface-sunk`   | `#151518`             | Empty states, quiet panels            |
-| `--surface-solid`  | `#1C1C20`             | Opaque fallback (select menus)        |
-| `--glass`          | `#1C1C20`             | Floating bars (solid, no blur)        |
-| `--ink`            | `#F5F5F7`             | Primary text                          |
-| `--ink-muted`      | `#A1A1A6`             | Secondary text                        |
-| `--ink-faint`      | `#6E6E73`             | Labels, hints, placeholders           |
-| `--rule`           | `#2A2A2E`             | 1px borders and dividers              |
-| `--rule-strong`    | `#3A3A40`             | Inputs, offline cards (dashed)        |
-| `--accent`         | `#F5F5F7`             | Primary button fill                   |
-| `--accent-ink`     | `#121214`             | Text on accent                        |
-| `--accent-wash`    | `#232327`             | Current nav item, selected card       |
-| `--focus`          | `#F5F5F7`             | 2px focus ring (3px offset)           |
+| Token              | Light     | Dark      | Use                                     |
+| ------------------ | --------- | --------- | --------------------------------------- |
+| `--canvas`         | `#FFFFFF` | `#0A0A0A` | Cards, panels, sidebar, inputs          |
+| `--canvas-soft`    | `#FAFAFA` | `#000000` | Page background, card stat wells        |
+| `--canvas-soft-2`  | `#F2F2F2` | `#1A1A1A` | Hover fills, current nav row, code bg   |
+| `--ink`            | `#171717` | `#EDEDED` | Primary text                            |
+| `--body`           | `#4D4D4D` | `#A1A1A1` | Secondary text                          |
+| `--mute`           | `#8F8F8F` | `#8F8F8F` | Labels, hints, placeholders             |
+| `--hairline`       | `#EBEBEB` | `#242424` | 1px dividers                            |
+| `--hairline-strong`| `#C9C9C9` | `#454545` | Input borders, offline card outline     |
+| `--primary`        | `#171717` | `#EDEDED` | Primary button fill, nav indicator      |
+| `--on-primary`     | `#FFFFFF` | `#0A0A0A` | Text on primary                         |
+| `--link` / `--focus` | `#0070F3` | `#52A8FF` | Focus ring, sparkline                 |
+| `--code-bg`        | `#171717` | `#000000` | JSON preview (code-editor mockup)       |
 
 ### Status colors (semantic)
 
-Each status has a foreground (`--st-*`) and a wash (`--st-*-wash`, the
-foreground at 14-16% alpha). **Status is always shown as icon + word +
-color.** Offline cards are also transparent with an outline, so a
-grayscale screenshot still reads correctly.
+Each status has a foreground (`--st-*`) and an opaque wash (`--st-*-wash`).
+**Status is always shown as icon + word + color.** Offline cards are also
+sunk to `--canvas-soft` with a strong outline, so a grayscale screenshot
+still reads correctly.
 
-| Status     | Word         | Icon (shape)                    | Color     |
-| ---------- | ------------ | ------------------------------- | --------- |
-| `running`  | Running      | Solid square with a slow pulse  | `#7FD08A` |
-| `starting` | Starting…    | Square with a spinning edge     | `#E0A458` |
-| `stopping` | Stopping…    | Small square inside a square    | `#E0A458` |
-| `idle`     | Ready        | Hollow square                   | `#ECECEF` |
-| `error`    | Error        | Triangle with exclamation mark  | `#E5484D` |
-| `offline`  | Offline      | Dashed square                   | `#6E6E76` |
+| Status     | Word         | Icon (shape)                    | Light     | Dark      |
+| ---------- | ------------ | ------------------------------- | --------- | --------- |
+| `running`  | Running      | Solid disc with a slow pulse    | `#297A3A` | `#62C073` |
+| `starting` | Starting…    | Quarter-arc spinner             | `#AB570A` | `#FFB224` |
+| `stopping` | Stopping…    | Square inside a ring            | `#AB570A` | `#FFB224` |
+| `idle`     | Ready        | Hollow ring                     | `#0068D6` | `#52A8FF` |
+| `error`    | Error        | Triangle with exclamation mark  | `#DA2F35` | `#FF6166` |
+| `offline`  | Offline      | Dashed ring                     | `#7D7D7D` | `#8F8F8F` |
 
 Starting and stopping share a hue on purpose, since both mean "in
 transition, wait". Their shapes and words differ.
 
-The security warning (no agent token) uses `--warn` (`#E5C07B`) for its
-icon and heading on a `--warn-wash` background.
+The security warning (no agent token) uses `--warn` on `--warn-wash` with a
+`--warn-line` hairline.
 
 ### Type
 
-- UI text uses the system font (`-apple-system`, SF Pro, Segoe UI
-  Variable, ...) with vendored **IBM Plex Sans** as the fallback, so it
-  stays offline.
-- **IBM Plex Mono** 400, 500 (vendored) for hostnames, IDs, JSON, and
-  timestamps. Numbers always use `font-variant-numeric: tabular-nums`.
+- **Geist** 400 / 500 / 600 for all UI text. 600 is the ceiling; never 700.
+- **Geist Mono** 400 / 500 for hostnames, IDs, JSON, timestamps, and the
+  small uppercase labels (stat names, summary tile labels, actor chips,
+  "Skipped"). Uppercase is allowed only in mono labels. Numbers always use
+  `font-variant-numeric: tabular-nums`.
+- Headings are sentence case with negative tracking.
 
-| Token        | Size / line height | Use                                  |
-| ------------ | ------------------ | ------------------------------------ |
-| `--t-xs`     | 12 / 16            | Meta, captions, stat labels          |
-| `--t-sm`     | 13 / 18            | Secondary text                       |
-| `--t-base`   | 15 / 22            | Body, controls, stat values          |
-| `--t-md`     | 17 / 24            | Card titles                          |
-| `--t-lg`     | 22 / 28            | Section titles                       |
-| `--t-xl`     | 34 / 40            | Page titles (700)                    |
-| `--t-num`    | 34 / 40            | Summary counts                       |
-
-Headings use `letter-spacing: -0.02em`. Labels are sentence case in
-`--ink-faint`, not uppercase.
+| Token      | Size / line height | Tracking  | Use                                  |
+| ---------- | ------------------ | --------- | ------------------------------------ |
+| `--t-cap`  | 12 / 16            | 0         | Captions, hints, badges, mono labels |
+| `--t-code` | 13 / 20            | 0         | JSON, stat values                    |
+| `--t-sm`   | 14 / 20            | -0.28px   | Body, controls (the base size)       |
+| `--t-md`   | 16 / 24            | -0.32px   | Card and panel titles, page subtitle |
+| `--t-d-sm` | 20 / 28            | -0.6px    | Section titles (`h2`)                |
+| `--t-d-md` | 24 / 32            | -0.96px   | Empty states, sign-in, phone `h1`    |
+| `--t-d-lg` | 32 / 40            | -1.28px   | Page titles (`h1`), summary counts   |
 
 ### Space, radius, elevation, motion
 
 - Spacing scale (4px base): `--s1` 4, `--s2` 8, `--s3` 12, `--s4` 16,
-  `--s5` 24, `--s6` 40, `--s7` 64.
-- Radius: all `--r-*` tokens are 0. Nothing is rounded, including
-  buttons, badges, inputs, and status shapes.
-- Elevation: surfaces are flat fills with 1px `--rule` borders. Hover
-  changes the fill only; nothing lifts or scales. The selection bar and
-  login card float with `--shadow-float` on an opaque `--glass` fill.
-- Motion: `.2-.3s` with `--ease`. All transitions and status
-  animations stop under `prefers-reduced-motion`.
+  `--s5` 24, `--s6` 32, `--s7` 48, `--s8` 64.
+- Radius: `--r-xs` 4 (inline code), `--r-sm` 6 (buttons, inputs, nav rows,
+  segmented control), `--r-md` 8 (banners, stat wells, JSON), `--r-lg` 12
+  (cards, panels, selection bar, sign-in card), `--r-full` (badges, chips,
+  live pill). **No pill buttons**: this is an app surface, so it stays on
+  the 6px scale.
+- Elevation is stacked, never one heavy drop:
+  `--ring` (1px hairline) → `--shadow-2` (resting cards) → `--shadow-4`
+  (hovered cards, result panel) → `--shadow-5` (selection bar, sign-in).
+  Cards never scale or move on hover; only the shadow deepens.
+- Motion: `.15-.2s ease` on color and shadow only. Status animations stop
+  under `prefers-reduced-motion`.
 - Hit targets are at least 40×40px; 44px on touch (`pointer: coarse`).
 
 ## Layout
 
-- Desktop (≥ 960px): 240px borderless sidebar (wordmark, nav, sign out)
-  + content column with max width 1320px and `--s6` gutters.
-- Tablet / phone (< 960px): sidebar becomes a sticky top bar with
-  the wordmark and a horizontal nav row; gutters drop to 16px. No
-  horizontal page scroll at 360px width.
-- Board grid: `repeat(auto-fill, minmax(280px, 1fr))`; one column on
-  phones.
+- Desktop (≥ 960px): 248px white sidebar with a right hairline (wordmark,
+  nav, theme toggle, sign out). The current nav row gets a `--canvas-soft-2`
+  fill plus a 2px `--primary` indicator on its left edge. Content column
+  max width 1400px with 48px gutters (32px below 1100px).
+- Tablet / phone (< 960px): the sidebar becomes a top bar with the wordmark
+  and a horizontal tab row; the current tab is underlined in `--primary`.
+  Gutters drop to 16px. No horizontal page scroll at 360px width.
+- Page head: `h1` + subtitle, closed by a hairline.
+- Summary strip: one joined panel of tiles split by 1px hairlines.
+- Board grid: `repeat(auto-fill, minmax(300px, 1fr))`; one column on phones.
 
 ## Components
 
 | Component        | Notes                                                                          |
 | ---------------- | ------------------------------------------------------------------------------ |
-| `Shell`          | Sidebar/topbar, nav with `aria-current="page"`, sign-out form.                  |
+| `Logo`           | College wordmark image (`public/brand/`), blue-text on light, reversed white-text on dark. Above the "Exam Console" name in the sidebar and sign-in card; 54px wide in the top bar. |
+| `ProductMark`    | Small RISC-V Exam Computer mark (max 156px) in the sidebar footer and at the foot of the sign-in card; dark themes use the white-lettering file (no plate); hidden in the phone top bar. |
+| `Shell`          | Sidebar/topbar, nav with `aria-current="page"`, theme toggle, sign-out form.   |
 | `Banner`         | Page-wide notice. Variant `warn` for the missing agent token.                   |
-| `StatusBadge`    | Icon + word, tinted wash. `role="status"` is not used (it would be too chatty). |
-| `SummaryStrip`   | One tile per status with count; tiles act as filters (`aria-pressed`).         |
-| `BoardCard`      | Checkbox, display name, mono hostname, badge, 3 key stats, last seen, link.    |
-| `SelectionBar`   | Sticky bottom bar when ≥ 1 board selected: count, exam picker, Start, Stop.    |
+| `StatusBadge`    | Icon + word on its wash, full radius. `role="status"` is not used.             |
+| `SummaryStrip`   | Mono label above a 32px count; tiles act as filters (`aria-pressed`), the pressed tile gets its status wash and a 2px bottom bar. |
+| `BoardCard`      | Checkbox, name, mono hostname, badge, stat well (3 key stats), last seen, link. Selected = 2px ink ring. |
+| `SelectionBar`   | Floating white bar (`--shadow-5`) when ≥ 1 board selected: count, exam picker, Start, Stop. |
 | `ResultPanel`    | After an action: boards queued, boards skipped with the reason for each.       |
-| `Button`         | Square buttons: `primary` (white), `secondary` (gray fill), `danger` (red wash), `ghost`. |
-| `Field`          | Label above, hint below, error text in `--st-error` with an icon.              |
-| `Stat`           | Caps label + mono value; optional `Meter` (memory) or `Sparkline` (temp).      |
-| `Timeline`       | Activity rows: time (mono), actor chip (Instructor / Board / System), text.    |
-| `JsonPreview`    | Mono `<pre>` on `--surface-sunk`, scrolls horizontally inside itself.          |
+| `Button`         | 6px radius: `primary` (ink fill), `secondary` (canvas + ring), `danger` (red text + red ring; solid red when armed), `ghost`. |
+| `Field`          | Label above, hint below, error text in `--st-error` with an icon. Inputs: canvas with a `--hairline-strong` inset border, focus = ink border + soft blue halo. |
+| `Stat`           | Mono uppercase label + value; optional `Meter` (memory) or `Sparkline` (temp). |
+| `Timeline`       | Activity rows split by hairlines: time (mono), actor chip (Instructor is ink-filled), text. |
+| `ExamActions`    | Ghost buttons: "Download .seb", "Download JSON"; "With password…" opens a full-width form row on `--canvas-soft`; Delete sits at the far right. |
+| `JsonPreview`    | Dark code-editor block (`--code-bg`), mono 13/20, scrolls inside itself.       |
 | `EmptyState`     | Line illustration (inline SVG, `currentColor`), one sentence, one action.      |
 | `ConfirmButton`  | Two-step destructive button: first click arms it ("Click again to forget").    |
+| `ThemeToggle`    | Segmented Auto / Light / Dark control in the sidebar footer (hidden < 960px). |
 
 ## Rules for future UI work
 
@@ -143,8 +158,11 @@ Headings use `letter-spacing: -0.02em`. Labels are sentence case in
    Render it as text. Never use `inner_html` or build HTML strings.
 5. Keep it offline: no external fonts, scripts, images, or analytics.
 6. Check a 360px phone width, keyboard-only use (visible focus,
-   logical tab order), and `prefers-reduced-motion`.
+   logical tab order), `prefers-reduced-motion`, and **both themes**.
 7. Copy is plain and specific: "Start exam on 4 boards", not "Submit".
    Use sentence case. No exclamation marks.
 8. Mono font for anything a person might compare character by character:
    hostnames, IPs, hashes, versions, timestamps, JSON.
+9. Vercel rules that apply here: no sixth accent color, no pill buttons, no
+   single heavy drop shadow, no weight above 600, and the mesh gradient
+   only at hero scale (the sign-in page).
